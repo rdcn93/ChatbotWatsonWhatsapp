@@ -40,6 +40,27 @@ def bot():
     msg = request.form.get('Body')
 
     input = {'text': msg}
+
+    # response = assistant.message(
+    #     workspace_id=workspace_id, input=input).get_result()
+
+    # responseSesId = assistant.create_session(assistant_id='2c1a74b6-3869-4b09-8e09-133a2d68fd26').get_result()
+
+    # response = assistant.message(
+    #     assistant_id='2c1a74b6-3869-4b09-8e09-133a2d68fd26',
+    #     session_id= str(responseSesId),
+    #     input={
+    #         'message_type': 'text',
+    #         'text': str(input)
+    #     }
+    # ).get_result()
+
+
+    # response = assistant.delete_session(assistant_id='2c1a74b6-3869-4b09-8e09-133a2d68fd26',session_id=str(responseSesId)).get_result()
+    # print(json.dumps(response, indent=2))
+
+
+
     response = assistant.message(
         workspace_id=workspace_id, input=input).get_result()
     print(json.dumps(response, indent=2))

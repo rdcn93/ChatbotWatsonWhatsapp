@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 @app.route("/bot", methods=['GET', 'POST'])
 def bot():
-    # ibm-watson auth
+    # ibm-watson autenticacion
     authenticator = IAMAuthenticator('2yc97zPkBEuQyq0LENgZn2x6-IpD29Dz-YFZfT2MjogI')
 
     # anterior 2018-07-10
@@ -18,10 +18,10 @@ def bot():
     # Agregar url segun la zona
     assistant.set_service_url('https://api.us-south.assistant.watson.cloud.ibm.com')
 
-    # responde to inscoming calls with a simple text message
-    # fetch the message
+    # obtener mensaje enviado desde la llamada al servicio
     msg = request.form.get('Body')
 
+    # validar que se envien los parametros
     if request.form.get('Body') is not None:
         msg = request.form.get('Body')
     elif request.form is not None:
@@ -29,22 +29,7 @@ def bot():
     else:
         msg = ''
 
-    input = {'text': msg}
-
-    # response = assistant.message(
-    #     workspace_id=workspace_id, input=input).get_result()
-
-    # responseSesId = assistant.create_session(assistant_id='2c1a74b6-3869-4b09-8e09-133a2d68fd26').get_result()
-
-    # response = assistant.message(
-    #     assistant_id='2c1a74b6-3869-4b09-8e09-133a2d68fd26',
-    #     session_id= str(responseSesId),
-    #     input={
-    #         'message_type': 'text',
-    #         'text': str(input)
-    #     }
-    # ).get_result()
-
+    # enviar el mensaje a Watson
     response = assistant.message_stateless(
         assistant_id='2c1a74b6-3869-4b09-8e09-133a2d68fd26',
         input={
@@ -52,9 +37,6 @@ def bot():
             'text': str(msg)
         }
     ).get_result()
-
-    # response = assistant.delete_session(assistant_id='2c1a74b6-3869-4b09-8e09-133a2d68fd26',session_id=str(responseSesId)).get_result()
-    # print(json.dumps(response, indent=2))
 
     while True:
         if response['output']['intents']:
@@ -64,16 +46,19 @@ def bot():
         if response['output']['generic']:
             resp = MessagingResponse()
 
-            tipoResultado = response['output']['generic'][0]['response_type']
+            for res in response['output']['generic']:
+                tipoResultado = res['response_type']
 
-            if tipoResultado == 'text':
-                resp.message(str(response['output']['generic'][0]['text']))
-            elif tipoResultado == 'image':
-                urlImagen = response['output']['generic'][0]['source']
-                tituloImagen = response['output']['generic'][0]['title']
-                resp.message(str(tituloImagen)).media(urlImagen)
-                        
+                if tipoResultado == 'text':
+                    resp.message(str(res['text']))
+                elif tipoResultado == 'image':
+                    urlImagen = res['source']
+                    tituloImagen = res['title']
+                    resp.message(str(tituloImagen)).media(urlImagen)
+
             return str(resp)
-
+        else:
+            sda = ''
+            #return str('')
 
 app.run(debug=True)
